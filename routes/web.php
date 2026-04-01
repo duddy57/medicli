@@ -30,3 +30,12 @@ Route::middleware(['auth'])->group(function (): void {
 });
 
 require __DIR__ . '/settings.php';
+
+use App\Http\Controllers\Clinicas\EmployeeController;
+
+Route::prefix('employees')->name('employees.')->group(function () {
+    Route::get('/', [EmployeeController::class, 'index'])->name('index');
+    Route::post('/', [EmployeeController::class, 'store'])->name('store');
+    Route::patch('{employee}', [EmployeeController::class, 'update'])->name('update');
+    Route::delete('{employee}', [EmployeeController::class, 'destroy'])->name('destroy');
+});

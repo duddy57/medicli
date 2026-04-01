@@ -1,6 +1,7 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage, useForm } from '@inertiajs/react';
 import { Pencil, Plus, Trash2, Stethoscope } from 'lucide-react';
 import { useEffect, useState } from 'react';
+
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -22,9 +23,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { index as clinicaIndex } from '@/routes/clinicas';
-import { index, store, update, destroy } from '@/routes/specialties';
-import { useForm } from '@inertiajs/react';
 
 interface Specialty {
     id: number;
@@ -48,9 +46,7 @@ interface Props {
 
 export default function SpecialtiesIndex({ clinica, specialties }: Props) {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [editingSpecialty, setEditingSpecialty] = useState<Specialty | null>(
-        null,
-    );
+    const [editingSpecialty, setEditingSpecialty] = useState<Specialty | null>(null);
     const [flashMessage, setFlashMessage] = useState<string | null>(null);
 
     const { flash } = usePage().props as { flash?: { success?: string } };
@@ -77,6 +73,13 @@ export default function SpecialtiesIndex({ clinica, specialties }: Props) {
         description: '',
     });
 
+    const closeModals = () => {
+        setIsCreateModalOpen(false);
+        setEditingSpecialty(null);
+        reset();
+        clearErrors();
+    };
+
     const openCreateModal = () => {
         reset();
         clearErrors();
@@ -92,38 +95,27 @@ export default function SpecialtiesIndex({ clinica, specialties }: Props) {
         clearErrors();
     };
 
-    const closeModals = () => {
-        setIsCreateModalOpen(false);
-        setEditingSpecialty(null);
-        reset();
-    };
-
     const handleCreate = (e: React.FormEvent) => {
         e.preventDefault();
-        post(store.url(clinica.slug), {
+
+        post(`/${clinica.slug}/specialties`, {
             onSuccess: () => closeModals(),
         });
     };
 
     const handleUpdate = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (!editingSpecialty) return;
-        patch(
-            update.url({
-                current_clinica: clinica.slug,
-                specialty: editingSpecialty.id,
-            }),
-            {
-                onSuccess: () => closeModals(),
-            },
-        );
+
+        patch(`/${clinica.slug}/specialties/${editingSpecialty.id}`, {
+            onSuccess: () => closeModals(),
+        });
     };
 
     const handleDelete = (id: number) => {
         if (confirm('Tem certeza que deseja excluir esta especialidade?')) {
-            router.delete(
-                destroy.url({ current_clinica: clinica.slug, specialty: id }),
-            );
+            router.delete(`/${clinica.slug}/specialties/${id}`);
         }
     };
 
@@ -132,7 +124,6 @@ export default function SpecialtiesIndex({ clinica, specialties }: Props) {
             <Head title="Especialidades" />
 
             <div className="flex flex-col space-y-6 p-8">
-                {/* Flash notification */}
                 {flashMessage && (
                     <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300">
                         {flashMessage}
@@ -147,7 +138,8 @@ export default function SpecialtiesIndex({ clinica, specialties }: Props) {
                     />
 
                     <Button onClick={openCreateModal}>
-                        <Plus className="mr-2 h-4 w-4" /> Nova Especialidade
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nova Especialidade
                     </Button>
                 </div>
 
@@ -178,29 +170,20 @@ export default function SpecialtiesIndex({ clinica, specialties }: Props) {
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8"
-                                                    onClick={() =>
-                                                        openEditModal(specialty)
-                                                    }
+                                                    onClick={() => openEditModal(specialty)}
                                                 >
                                                     <Pencil className="h-4 w-4" />
-                                                    <span className="sr-only">
-                                                        Editar
-                                                    </span>
+                                                    <span className="sr-only">Editar</span>
                                                 </Button>
+
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                                    onClick={() =>
-                                                        handleDelete(
-                                                            specialty.id,
-                                                        )
-                                                    }
+                                                    onClick={() => handleDelete(specialty.id)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
-                                                    <span className="sr-only">
-                                                        Excluir
-                                                    </span>
+                                                    <span className="sr-only">Excluir</span>
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -215,8 +198,7 @@ export default function SpecialtiesIndex({ clinica, specialties }: Props) {
                                 Nenhuma especialidade cadastrada
                             </h3>
                             <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                                Comece adicionando a primeira especialidade para
-                                esta clínica.
+                                Comece adicionando a primeira especialidade para esta clínica.
                             </p>
                             <Button
                                 variant="outline"
@@ -231,7 +213,6 @@ export default function SpecialtiesIndex({ clinica, specialties }: Props) {
                 </div>
             </div>
 
-            {/* Modal de Criação */}
             <Dialog
                 open={isCreateModalOpen}
                 onOpenChange={(open) => {
@@ -252,23 +233,20 @@ export default function SpecialtiesIndex({ clinica, specialties }: Props) {
                             <Input
                                 id="title"
                                 value={data.title}
-                                onChange={(e) =>
-                                    setData('title', e.target.value)
-                                }
+                                onChange={(e) => setData('title', e.target.value)}
                                 placeholder="Ex: Cardiologia"
                                 autoFocus
                                 required
                             />
                             <InputError message={errors.title} />
                         </div>
+
                         <div className="grid gap-2">
                             <Label htmlFor="description">Descrição</Label>
                             <Input
                                 id="description"
                                 value={data.description}
-                                onChange={(e) =>
-                                    setData('description', e.target.value)
-                                }
+                                onChange={(e) => setData('description', e.target.value)}
                                 placeholder="Breve descrição da especialidade"
                             />
                             <InputError message={errors.description} />
@@ -282,24 +260,19 @@ export default function SpecialtiesIndex({ clinica, specialties }: Props) {
                             >
                                 Cancelar
                             </Button>
+
                             <Button type="submit" disabled={processing}>
-                                {processing
-                                    ? 'Criando...'
-                                    : 'Criar Especialidade'}
+                                {processing ? 'Criando...' : 'Criar Especialidade'}
                             </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
             </Dialog>
 
-            {/* Modal de Edição */}
             <Dialog
                 open={!!editingSpecialty}
                 onOpenChange={(open) => {
-                    if (!open) {
-                        setEditingSpecialty(null);
-                        reset();
-                    }
+                    if (!open) closeModals();
                 }}
             >
                 <DialogContent className="sm:max-w-md">
@@ -316,23 +289,20 @@ export default function SpecialtiesIndex({ clinica, specialties }: Props) {
                             <Input
                                 id="edit-title"
                                 value={data.title}
-                                onChange={(e) =>
-                                    setData('title', e.target.value)
-                                }
+                                onChange={(e) => setData('title', e.target.value)}
                                 placeholder="Ex: Cardiologia"
                                 autoFocus
                                 required
                             />
                             <InputError message={errors.title} />
                         </div>
+
                         <div className="grid gap-2">
                             <Label htmlFor="edit-description">Descrição</Label>
                             <Input
                                 id="edit-description"
                                 value={data.description}
-                                onChange={(e) =>
-                                    setData('description', e.target.value)
-                                }
+                                onChange={(e) => setData('description', e.target.value)}
                                 placeholder="Breve descrição da especialidade"
                             />
                             <InputError message={errors.description} />
@@ -346,10 +316,9 @@ export default function SpecialtiesIndex({ clinica, specialties }: Props) {
                             >
                                 Cancelar
                             </Button>
+
                             <Button type="submit" disabled={processing}>
-                                {processing
-                                    ? 'Salvando...'
-                                    : 'Salvar Alterações'}
+                                {processing ? 'Salvando...' : 'Salvar Alterações'}
                             </Button>
                         </DialogFooter>
                     </form>
@@ -359,17 +328,16 @@ export default function SpecialtiesIndex({ clinica, specialties }: Props) {
     );
 }
 
-SpecialtiesIndex.layout = (
-    props: Props & { currentClinica?: { slug: string } | null },
-) => {
+SpecialtiesIndex.layout = (props: Props) => {
     const clinica = props.clinica;
+
     if (!clinica) return {};
 
     return {
         breadcrumbs: [
-            { title: 'Clínicas', href: clinicaIndex() },
+            { title: 'Clínicas', href: '#' },
             { title: clinica.name, href: '#' },
-            { title: 'Especialidades', href: index(clinica.slug) },
+            { title: 'Especialidades', href: `/${clinica.slug}/specialties` },
         ],
     };
 };
