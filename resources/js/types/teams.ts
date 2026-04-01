@@ -1,10 +1,11 @@
-export type ClinicaRole = 'owner' | 'admin' | 'member';
+export type ClinicaRole = 'owner' | 'admin' | 'doctor' | 'member';
 
 export type Clinica = {
     id: number;
     name: string;
     slug: string;
     isPersonal: boolean;
+    publicId: string;
     role?: ClinicaRole;
     roleLabel?: string;
     isCurrent?: boolean;

@@ -1,6 +1,6 @@
 import { Transition } from '@headlessui/react';
 import { Form, Head, router } from '@inertiajs/react';
-import { ChevronDown, Mail, UserPlus, X } from 'lucide-react';
+import { Check, ChevronDown, Copy, Mail, UserPlus, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import CancelInvitationModal from '@/components/cancel-invitation-modal';
 import DeleteClinicaModal from '@/components/delete-clinica-modal';
@@ -25,6 +25,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useClipboard } from '@/hooks/use-clipboard';
 import { useInitials } from '@/hooks/use-initials';
 import { edit, index, update } from '@/routes/clinicas';
 import { update as updateMember } from '@/routes/clinicas/members';
@@ -52,6 +53,16 @@ export default function ClinicaEdit({
     availableRoles,
 }: Props) {
     const getInitials = useInitials();
+    const [, copy] = useClipboard();
+    const [copiedCode, setCopiedCode] = useState(false);
+
+    const handleCopyCode = async () => {
+        const success = await copy(clinica.publicId);
+        if (success) {
+            setCopiedCode(true);
+            setTimeout(() => setCopiedCode(false), 2000);
+        }
+    };
 
     const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -159,6 +170,48 @@ export default function ClinicaEdit({
                             <Heading variant="small" title={clinica.name} />
                         </>
                     )}
+                </div>
+
+                <div className="space-y-6">
+                    <Heading
+                        variant="small"
+                        title="Clinica code"
+                        description="Share this code so others can join your clinica"
+                    />
+
+                    <div className="flex items-center gap-3 rounded-lg border bg-card p-4 shadow-sm">
+                        <code className="flex-1 rounded-md bg-muted px-3 py-2 font-mono text-sm select-all">
+                            {clinica.publicId}
+                        </code>
+
+                        <TooltipProvider>
+                            <Tooltip open={copiedCode}>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleCopyCode}
+                                        data-test="copy-clinica-code-button"
+                                    >
+                                        {copiedCode ? (
+                                            <>
+                                                <Check className="mr-2 h-4 w-4" />
+                                                Copied
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Copy className="mr-2 h-4 w-4" />
+                                                Copy
+                                            </>
+                                        )}
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Copy clinica code to clipboard</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
                 </div>
 
                 <div className="space-y-6">

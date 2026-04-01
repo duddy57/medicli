@@ -1,10 +1,12 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     BookOpen,
+    Calendar,
     FolderGit2,
     LayoutGrid,
     Stethoscope,
     Users,
+    Wrench,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -39,6 +41,14 @@ export function AppSidebar() {
         ? `/${currentClinica.slug}/employees`
         : '#';
 
+    const servicesUrl = currentClinica
+        ? `/${currentClinica.slug}/services`
+        : '#';
+
+    const appointmentsUrl = currentClinica
+        ? `/${currentClinica.slug}/appointments`
+        : '#';
+
     const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',
@@ -49,6 +59,16 @@ export function AppSidebar() {
             title: 'Especialidades',
             href: specialtiesUrl,
             icon: Stethoscope,
+        },
+        {
+            title: 'Serviços',
+            href: servicesUrl,
+            icon: Wrench,
+        },
+        {
+            title: 'Atendimentos',
+            href: appointmentsUrl,
+            icon: Calendar,
         },
         {
             title: 'Funcionários',
