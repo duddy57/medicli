@@ -55,6 +55,7 @@ class ClinicaController extends Controller
                 'name'       => $clinica->name,
                 'slug'       => $clinica->slug,
                 'isPersonal' => $clinica->is_personal,
+                'publicId'   => $clinica->public_id,
             ],
             'members' => $clinica->members()->get()->map(fn ($member): array => [
                 'id'         => $member->id,

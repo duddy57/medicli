@@ -2,8 +2,10 @@
 
 declare(strict_types = 1);
 
+use App\Http\Controllers\Clinicas\AppointmentController;
 use App\Http\Controllers\Clinicas\ClinicaInvitationController;
 use App\Http\Controllers\Clinicas\EmployeeController;
+use App\Http\Controllers\Clinicas\ServiceController;
 use App\Http\Controllers\Clinicas\SpecialtyController;
 use App\Http\Middleware\EnsureClinicaMembership;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +32,20 @@ Route::prefix('{current_clinica}')
             Route::post('/', [EmployeeController::class, 'store'])->name('store');
             Route::patch('{employee}', [EmployeeController::class, 'update'])->name('update');
             Route::delete('{employee}', [EmployeeController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('services')->name('services.')->group(function (): void {
+            Route::get('/', [ServiceController::class, 'index'])->name('index');
+            Route::post('/', [ServiceController::class, 'store'])->name('store');
+            Route::patch('{service}', [ServiceController::class, 'update'])->name('update');
+            Route::delete('{service}', [ServiceController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('appointments')->name('appointments.')->group(function (): void {
+            Route::get('/', [AppointmentController::class, 'index'])->name('index');
+            Route::post('/', [AppointmentController::class, 'store'])->name('store');
+            Route::patch('{appointment}', [AppointmentController::class, 'update'])->name('update');
+            Route::delete('{appointment}', [AppointmentController::class, 'destroy'])->name('destroy');
         });
     });
 

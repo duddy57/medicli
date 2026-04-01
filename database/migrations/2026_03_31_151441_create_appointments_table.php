@@ -3,6 +3,8 @@
 declare(strict_types = 1);
 
 use App\Models\Clinica;
+use App\Models\Employee;
+use App\Models\Patient;
 use App\Models\Specialty;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -20,6 +22,13 @@ return new class () extends Migration
 
             $table->timestamp('occurs_at')->useCurrent();
             $table->string('observation')->nullable();
+            $table->string('status')->nullable();
+            $table->string('reason')->nullable();
+            $table->string('notes')->nullable();
+
+            $table->decimal('price', 10, 2)->nullable();
+            $table->string('payment_status')->nullable();
+            $table->string('payment_method')->nullable();
 
             $table->foreignIdFor(Patient::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Employee::class)->constrained()->cascadeOnDelete();
